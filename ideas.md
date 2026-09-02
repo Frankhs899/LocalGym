@@ -27,7 +27,8 @@ Para asegurar un desarrollo ágil y maduro, se ha delimitado estrictamente el al
 - **Gestión de Socios:** Registro y consulta de los datos principales del miembro.
 - **Gestión de Membresías:** Definición de plantillas de membresía por el administrador y asignación directa a los socios.
 - **Registro de Pagos Básico:** Control manual de transacciones asociadas a la contratación de membresías.
-- **Control de Vigencia:** Cálculo derivado en tiempo real para verificar si un socio tiene permitido el acceso en el día actual.
+- **Control de Vigencia:** Consulta en tiempo real para verificar si un socio tiene permitido el acceso en el día actual, basada en las fechas persistidas de sus membresías.
+- **Exportación de Respaldo:** Botón de "Descargar respaldo" en la UI (solo superusuario) que genera una copia consistente de la base de datos SQLite usando su mecanismo nativo de backup, más un aviso del tiempo transcurrido desde el último respaldo (ver sección 6).
 
 ### Fuera de Alcance (v1 - Planificado para el Futuro):
 
@@ -38,13 +39,13 @@ Para asegurar un desarrollo ágil y maduro, se ha delimitado estrictamente el al
 - Carga y visualización de fotos de socios.
 - Apilamiento de membresías automático y secuencial.
 - Roles y permisos granulares diferenciados más allá de superusuario/usuario (se mantiene el esquema lo más simple posible en v1).
-- Estrategia formal de backups (pendiente de definir — ver sección 6).
+- Automatización de backups (programación con Task Scheduler/cron, subida a la nube). La exportación manual desde la UI sí está en v1.
 
 ---
 
 ## 3. Modelo de Dominio
 
-El modelo de datos se ha diseñado para reflejar fielmente las reglas del negocio de manera limpia, evitando redundancias en la base de datos mediante la derivación de datos temporales. **Las entidades y sus atributos se declaran en inglés en el código; la interfaz de usuario (UI) se muestra en español.**
+El modelo de datos se ha diseñado para reflejar fielmente las reglas del negocio de manera limpia: los datos contractuales (como las fechas de vigencia) se persisten para garantizar su integridad, y los datos puramente informativos se derivan cuando corresponde. **Las entidades y sus atributos se declaran en inglés en el código; la interfaz de usuario (UI) se muestra en español.**
 
 ### A. Entidad: `Member` (Socio)
 
@@ -69,7 +70,7 @@ Funciona como una plantilla que define las membresías disponibles en el gimnasi
 
 - **`name`:** Ej. "Pase Libre Mensual", "Clases de Boxeo".
 - **`description`:** (Opcional).
-- **`duration_days`:** Plazo de validez de la membresía una vez activada.
+- **`duration_days`:** Plazo de validez de la membresía una vez activada. Funciona como **valor por defecto de la plantilla**: se usa únicamente para calcular el `end_date` al momento de crear una `Membership`; editarlo después no afecta las membresías ya creadas.
 - **`price`:** Precio sugerido establecido por el administrador.
 
 ### C. Entidad: `Membership` (Asignación de Membresía)
@@ -78,8 +79,8 @@ Es la instancia real de contratación de una membresía por parte de un socio. *
 
 - **`member`:** Relación (Foreign Key) con la entidad `Member`.
 - **`membership_type`:** Relación (Foreign Key) con la plantilla `MembershipType`.
-- **`start_date`:** Fecha establecida para el comienzo de la vigencia de la membresía.
-- **`end_date` (DATO DERIVADO):** No se guarda en la base de datos. Se calcula dinámicamente mediante la suma: `start_date + duration_days` del `MembershipType` asociado.
+- **`start_date`:** Fecha establecida para el comienzo de la vigencia de la membresía. Se ingresa **manualmente**, ya que un socio puede pagar un día y comenzar a entrenar otro.
+- **`end_date` (DATO PERSISTIDO):** Se guarda en la base de datos. Se calcula automáticamente al crear la membresía como `start_date + duration_days` del `MembershipType` **en ese momento**, y queda congelada: si el administrador edita posteriormente el `duration_days` de la plantilla, las membresías ya creadas no se ven afectadas. Es de **solo lectura** (no editable); para extender vigencias se utiliza el apilamiento manual (regla 4).
 
 ### D. Entidad: `Payment` (Registro de Pago) — _nueva entidad_
 
@@ -105,7 +106,7 @@ Member 1───N Membership N───1 MembershipType
 
 ### Reglas de Validación y Lógica de Negocio:
 
-1.  **Vigencia en Tiempo Real:** El estado de un socio ("¿Está vigente para ingresar hoy?") se calcula de forma derivada. El sistema verifica si hoy existe al menos una `Membership` asignada al socio cuyo rango calculado `[start_date, end_date]` contenga la fecha actual.
+1.  **Vigencia en Tiempo Real:** El estado de un socio ("¿Está vigente para ingresar hoy?") se calcula de forma derivada **a partir de datos persistidos**. El sistema verifica si hoy existe al menos una `Membership` asignada al socio cuyo rango `[start_date, end_date]` (columnas reales e indexables) contenga la fecha actual.
 2.  **No Solapamiento del Mismo Tipo:** No se permite que un socio tenga dos `Membership` del mismo `membership_type` activas con rangos de fechas superpuestos. El sistema validará esto antes de guardar el registro; en caso de conflicto, se bloqueará la creación y **el mensaje de error en la UI sugerirá directamente al administrador la fecha de inicio correcta** (`end_date` de la membresía existente `+ 1 día`).
 3.  **Múltiples Membresías Activas Diferentes (En Paralelo):** Un socio puede tener distintas membresías activas simultáneamente si corresponden a tipos diferentes (ej. "Acceso al gimnasio mensual" + "Pase de clases de boxeo"). Cada una correrá bajo sus propios parámetros de inicio y vigencia.
 4.  **Apilamiento Secuencial Manual:** Para el caso de pago de meses adelantados del mismo tipo de membresía, el apilamiento automático secuencial queda fuera de v1. El administrador lo gestiona manualmente creando el segundo registro e ingresando como fecha de inicio el día inmediatamente posterior al vencimiento de la primera membresía (`end_date` anterior `+ 1`).
@@ -145,7 +146,4 @@ La elección del stack técnico se apoya en el principio de equilibrio entre la 
 La distribución local gratuita de un software siempre afronta el reto de la complejidad de instalación para usuarios no técnicos. La estrategia de LocalGym aborda esto mediante un doble camino:
 
 1.  **Instalación Local para Producción:** Se documentará con absoluta claridad el proceso de instalación local. El administrador o dueño deberá clonar el repositorio, configurar el entorno virtual, instalar dependencias de Django y pnpm, realizar el build de React y ejecutar el servidor local. Dado que es gratuito, se acepta el tradeoff de que el dueño del negocio pueda requerir soporte o contratar a un técnico informático para realizar esta configuración inicial en su PC local (servidor del gimnasio).
-2.  **Backups (pendiente de definir):** Se reconoce la necesidad de una estrategia de respaldo para la base de datos SQLite local, dado que no hay un entorno en la nube por defecto. Opciones a evaluar a futuro:
-    - Función de "Exportar backup" desde el panel de administración (descarga del archivo SQLite o un dump en formato JSON vía `dumpdata`).
-    - Comando de management de Django ejecutable manualmente o programable mediante el Task Scheduler (Windows) o cron (Linux).
-    - Recordatorio en la UI del tiempo transcurrido desde el último backup.
+2.  **Backups (decisión tomada — incluido en v1):** La v1 incluye una función de **"Descargar respaldo"** en la interfaz, disponible únicamente para el superusuario, que genera y descarga una copia **consistente** de la base de datos (un archivo `.sqlite3`) utilizando el mecanismo nativo de backup de SQLite (`VACUUM INTO` / API de copia en caliente). Se descartan dos alternativas: copiar el archivo directamente (riesgo de corrupción si hay escrituras en curso) y exportar a JSON con `dumpdata` (restauración frágil). La UI mostrará además un recordatorio del tiempo transcurrido desde el último respaldo. La guarda del archivo descargado en un medio externo (pendrive, nube personal) es responsabilidad del administrador del gimnasio. Queda explícitamente **fuera de v1** toda automatización (comandos programados con Task Scheduler o cron, subida a la nube).
