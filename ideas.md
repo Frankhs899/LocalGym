@@ -130,8 +130,9 @@ Se implementará un esquema de autenticación sencillo para v1:
 La elección del stack técnico se apoya en el principio de equilibrio entre la robustez del desarrollo, las restricciones del entorno local desconectado y el dominio técnico actual del desarrollador principal.
 
 - **Backend:** **Django 5.2** utilizando **Django REST Framework (DRF)**. Django aporta estabilidad (LTS), un ORM maduro, migraciones sólidas, y su panel de administración nativo que agiliza la visualización de base de datos en fases de desarrollo.
+- **Dependencias backend v1:** `Django==5.2.*`, `djangorestframework`, `django-environ`, `whitenoise` y `django-filter`. Paquetes como `waitress` o `psycopg` quedan fuera hasta que exista una necesidad concreta.
 - **Base de Datos:** **SQLite** por defecto para el entorno de producción local. SQLite es ideal debido a que los datos de un gimnasio mediano ocupan un volumen muy bajo y no requiere la instalación de un motor de bases de datos complejo en la PC cliente. Se puede parametrizar de forma opcional para utilizar **PostgreSQL** mediante variables de entorno si se despliega en la nube.
-- **Frontend:** **React** + **Tailwind CSS** + **Vite**, proporcionando una interfaz moderna, limpia, responsiva y de carga instantánea.
+- **Frontend:** **React** con **JavaScript** (sin TypeScript en v1), **Tailwind CSS**, **Vite** y **`react-router`**. TypeScript se reconoce como una buena opción, pero se descarta para esta versión para no convertirlo en un obstáculo de aprendizaje.
 - **Manejador de Paquetes:** **pnpm** (en lugar de npm) por su velocidad superior, eficiencia en el almacenamiento mediante enlaces simbólicos y consistencia con su archivo de bloqueo deterministicamente ordenado.
 - **Aislamiento de Entorno:** Uso obligatorio de un **entorno virtual de Python (venv)** para el proyecto del backend, garantizando que dependencias pesadas como Django no se instalen de manera global en el sistema operativo del host.
 - **Estructura del Proyecto (Monorepo):** Un único repositorio que contiene:
