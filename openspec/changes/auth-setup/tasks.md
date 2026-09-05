@@ -25,19 +25,19 @@ Chain strategy: pending
 
 ## Phase 1: Foundation (app shell + config)
 
-- [ ] 1.1 Create `backend/accounts/` app shell (`__init__.py`, `apps.py`).
-- [ ] 1.2 `backend/config/settings.py`: add `rest_framework` + `accounts` to `INSTALLED_APPS`; `REST_FRAMEWORK` defaults (SessionAuthentication, IsAuthenticated); `SESSION_EXPIRE_AT_BROWSER_CLOSE=True`; dev `CSRF_TRUSTED_ORIGINS` incl. `http://localhost:5173`. [R5, R6]
-- [ ] 1.3 `backend/config/urls.py`: mount `path("api/auth/", include("accounts.urls"))`; leave `/api/health/` untouched. [R5]
+- [x] 1.1 Create `backend/accounts/` app shell (`__init__.py`, `apps.py`).
+- [x] 1.2 `backend/config/settings.py`: add `rest_framework` + `accounts` to `INSTALLED_APPS`; `REST_FRAMEWORK` defaults (SessionAuthentication, IsAuthenticated); `SESSION_EXPIRE_AT_BROWSER_CLOSE=True`; dev `CSRF_TRUSTED_ORIGINS` incl. `http://localhost:5173`. [R5, R6]
+- [x] 1.3 `backend/config/urls.py`: mount `path("api/auth/", include("accounts.urls"))`; leave `/api/health/` untouched. [R5]
 
 ## Phase 2: Backend endpoints (TDD: RED → GREEN)
 
-- [ ] 2.1 RED: write failing `accounts/tests.py` login tests — valid 200 + session/`csrftoken` cookies + no password; invalid 400 generic; inactive 400; anonymous POST CSRF-exempt + cookie set (`enforce_csrf_checks` client). [R1]
-- [ ] 2.2 GREEN: `accounts/serializers.py` `LoginSerializer` + `accounts/views.py` `LoginView` (AllowAny, manual 400 via `authenticate()`, `@ensure_csrf_cookie`) until green. [R1]
-- [ ] 2.3 RED: failing tests — logout clears session + `me`→401, anonymous logout 401 [R2]; `me` 200 `{id, username, is_superuser}` no password, anonymous 401 [R3]; health public 200 [R5]; `SESSION_EXPIRE_AT_BROWSER_CLOSE` is True [R6].
-- [ ] 2.4 GREEN: `LogoutView` + `MeView` in `views.py`, `MeSerializer` in `serializers.py`, routes in `accounts/urls.py`; tests pass. [R2, R3, R5]
-- [ ] 2.5 RED: write failing tests — superuser creates user 201, no password, `is_superuser=False`; 403 non-superuser; 401 anonymous; 400 duplicate username. [R4]
-- [ ] 2.6 GREEN: `CreateUserView` (IsAdminUser) + `CreateUserSerializer` (password write-only, force `is_superuser=False`) until green. [R4]
-- [ ] 2.7 Full backend suite green: `backend/venv/Scripts/python.exe manage.py test`. [R1–R6]
+- [x] 2.1 RED: write failing `accounts/tests.py` login tests — valid 200 + session/`csrftoken` cookies + no password; invalid 400 generic; inactive 400; anonymous POST CSRF-exempt + cookie set (`enforce_csrf_checks` client). [R1]
+- [x] 2.2 GREEN: `accounts/serializers.py` `LoginSerializer` + `accounts/views.py` `LoginView` (AllowAny, manual 400 via `authenticate()`, `@ensure_csrf_cookie`) until green. [R1]
+- [x] 2.3 RED: failing tests — logout clears session + `me`→401, anonymous logout 401 [R2]; `me` 200 `{id, username, is_superuser}` no password, anonymous 401 [R3]; health public 200 [R5]; `SESSION_EXPIRE_AT_BROWSER_CLOSE` is True [R6].
+- [x] 2.4 GREEN: `LogoutView` + `MeView` in `views.py`, `MeSerializer` in `serializers.py`, routes in `accounts/urls.py`; tests pass. [R2, R3, R5]
+- [x] 2.5 RED: write failing tests — superuser creates user 201, no password, `is_superuser=False`; 403 non-superuser; 401 anonymous; 400 duplicate username. [R4]
+- [x] 2.6 GREEN: `CreateUserView` (IsAdminUser) + `CreateUserSerializer` (password write-only, force `is_superuser=False`) until green. [R4]
+- [x] 2.7 Full backend suite green: `backend/venv/Scripts/python.exe manage.py test`. [R1–R6]
 
 ## Phase 3: Frontend auth module
 
