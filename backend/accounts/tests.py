@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.contrib.auth.models import User
 from django.test import TestCase
 from rest_framework.test import APIClient
@@ -61,3 +62,71 @@ class LoginTests(TestCase):
 
         assert response.status_code == 200
         assert "csrftoken" in response.cookies
+
+
+class LogoutTests(TestCase):
+    def setUp(self):
+        self.user = User.objects.create_user(username="ana", password="secret123")
+        self.client = APIClient()
+        self.client.login(username="ana", password="secret123")
+
+    def _authenticated_csrf_client(self):
+        csrf_client = APIClient(enforce_csrf_checks=True)
+        login_response = csrf_client.post(
+            "/api/auth/login/", {"username": "ana", "password": "secret123"}
+        )
+        assert login_response.status_code == 200
+        csrf_client.credentials(
+            HTTP_X_CSRFTOKEN=csrf_client.cookies["csrftoken"].value
+        )
+        return csrf_client
+
+    def test_logout_clears_session_and_me_returns_401(self):
+        csrf_client = self._authenticated_csrf_client()
+
+        response = csrf_client.post("/api/auth/logout/")
+
+        assert response.status_code == 200
+        assert csrf_client.get("/api/auth/me/").status_code == 401
+
+    def test_anonymous_logout_returns_401(self):
+        response = APIClient().post("/api/auth/logout/")
+
+        assert response.status_code == 401
+
+
+class CurrentUserTests(TestCase):
+    def setUp(self):
+        self.user = User.objects.create_user(username="ana", password="secret123")
+        self.client = APIClient()
+
+    def test_authenticated_me_returns_public_fields(self):
+        self.client.login(username="ana", password="secret123")
+
+        response = self.client.get("/api/auth/me/")
+
+        assert response.status_code == 200
+        assert response.data == {
+            "id": self.user.id,
+            "username": "ana",
+            "is_superuser": False,
+        }
+        assert "password" not in response.data
+
+    def test_anonymous_me_returns_401(self):
+        response = self.client.get("/api/auth/me/")
+
+        assert response.status_code == 401
+
+
+class HealthTests(TestCase):
+    def test_health_is_public(self):
+        response = APIClient().get("/api/health/")
+
+        assert response.status_code == 200
+        assert response.json() == {"status": "ok"}
+
+
+class SessionExpiryTests(TestCase):
+    def test_session_expires_on_browser_close(self):
+        assert settings.SESSION_EXPIRE_AT_BROWSER_CLOSE is True

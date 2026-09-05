@@ -1,4 +1,4 @@
-from django.contrib.auth import authenticate, login
+from django.contrib.auth import authenticate, login, logout
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import ensure_csrf_cookie
 from rest_framework import status
@@ -36,3 +36,14 @@ class LoginView(APIView):
             )
         login(request, user)
         return Response(MeSerializer(user).data)
+
+
+class LogoutView(APIView):
+    def post(self, request):
+        logout(request)
+        return Response({"detail": "Logged out."})
+
+
+class MeView(APIView):
+    def get(self, request):
+        return Response(MeSerializer(request.user).data)
