@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
 import { Link, Route, Routes, useNavigate } from "react-router";
 
-import { AuthProvider, useAuth } from "./auth/AuthContext.jsx";
+import { AuthProvider } from "./auth/AuthContext.jsx";
+import { useAuth } from "./auth/useAuth.js";
 import RequireAuth from "./auth/RequireAuth.jsx";
 import Login from "./pages/Login.jsx";
 import NewUser from "./pages/NewUser.jsx";

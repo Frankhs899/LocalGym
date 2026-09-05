@@ -1,7 +1,7 @@
 import { useState } from "react";
 
 import { createUser } from "../auth/api.js";
-import { useAuth } from "../auth/AuthContext.jsx";
+import { useAuth } from "../auth/useAuth.js";
 
 export default function NewUser() {
   const { user } = useAuth();
