@@ -53,6 +53,27 @@ class LoginTests(TestCase):
         session_cookie = response.cookies.get("sessionid")
         assert session_cookie is None or session_cookie.value == ""
 
+    def test_login_with_missing_field_returns_400_generic(self):
+        missing_password = self.client.post("/api/auth/login/", {"username": "ana"})
+        wrong_password = self.client.post(
+            "/api/auth/login/", {"username": "ana", "password": "wrongpass"}
+        )
+
+        assert missing_password.status_code == 400
+        # Same generic body: a malformed request leaks nothing extra.
+        assert missing_password.data == wrong_password.data
+
+    def test_login_with_empty_credentials_returns_400_generic(self):
+        empty = self.client.post(
+            "/api/auth/login/", {"username": "", "password": ""}
+        )
+        wrong_password = self.client.post(
+            "/api/auth/login/", {"username": "ana", "password": "wrongpass"}
+        )
+
+        assert empty.status_code == 400
+        assert empty.data == wrong_password.data
+
     def test_anonymous_post_is_csrf_exempt_and_sets_csrf_cookie(self):
         csrf_client = APIClient(enforce_csrf_checks=True)
 
@@ -87,7 +108,19 @@ class LogoutTests(TestCase):
         response = csrf_client.post("/api/auth/logout/")
 
         assert response.status_code == 200
+        assert csrf_client.cookies["sessionid"].value == ""
         assert csrf_client.get("/api/auth/me/").status_code == 401
+
+    def test_logout_without_csrf_token_returns_403(self):
+        csrf_client = APIClient(enforce_csrf_checks=True)
+        login_response = csrf_client.post(
+            "/api/auth/login/", {"username": "ana", "password": "secret123"}
+        )
+        assert login_response.status_code == 200
+
+        response = csrf_client.post("/api/auth/logout/")
+
+        assert response.status_code == 403
 
     def test_anonymous_logout_returns_401(self):
         response = APIClient().post("/api/auth/logout/")
@@ -131,6 +164,18 @@ class SessionExpiryTests(TestCase):
     def test_session_expires_on_browser_close(self):
         assert settings.SESSION_EXPIRE_AT_BROWSER_CLOSE is True
 
+    def test_login_session_cookie_carries_no_persistent_expiry(self):
+        User.objects.create_user(username="ana", password="secret123")
+
+        response = APIClient().post(
+            "/api/auth/login/", {"username": "ana", "password": "secret123"}
+        )
+
+        assert response.status_code == 200
+        # Browser-close expiry: the session cookie must not carry a
+        # persistent `expires` attribute.
+        assert not response.cookies["sessionid"]["expires"]
+
 
 class CreateUserTests(TestCase):
     def setUp(self):
@@ -153,11 +198,16 @@ class CreateUserTests(TestCase):
     def test_superuser_creates_regular_user(self):
         response = self._admin_client().post(
             "/api/auth/users/",
-            {"username": "luis", "password": "gympass123"},
+            {
+                "username": "luis",
+                "password": "gympass123",
+                "is_superuser": True,
+            },
         )
 
         assert response.status_code == 201
         assert response.data["username"] == "luis"
+        assert response.data["is_superuser"] is False
         assert "password" not in response.data
         created = User.objects.get(username="luis")
         assert created.is_superuser is False
@@ -168,6 +218,36 @@ class CreateUserTests(TestCase):
         member_client.login(username="ana", password="secret123")
 
         response = member_client.post(
+            "/api/auth/users/",
+            {"username": "luis", "password": "gympass123"},
+        )
+
+        assert response.status_code == 403
+        assert User.objects.filter(username="luis").exists() is False
+
+    def test_staff_non_superuser_gets_403(self):
+        staff = User.objects.create_user(username="boss", password="staff123")
+        staff.is_staff = True
+        staff.save()
+        staff_client = APIClient()
+        staff_client.login(username="boss", password="staff123")
+
+        response = staff_client.post(
+            "/api/auth/users/",
+            {"username": "luis", "password": "gympass123"},
+        )
+
+        assert response.status_code == 403
+        assert User.objects.filter(username="luis").exists() is False
+
+    def test_create_user_without_csrf_token_returns_403(self):
+        csrf_client = APIClient(enforce_csrf_checks=True)
+        login_response = csrf_client.post(
+            "/api/auth/login/", {"username": "root", "password": "admin123"}
+        )
+        assert login_response.status_code == 200
+
+        response = csrf_client.post(
             "/api/auth/users/",
             {"username": "luis", "password": "gympass123"},
         )
@@ -191,3 +271,24 @@ class CreateUserTests(TestCase):
         )
 
         assert response.status_code == 400
+
+
+class MethodNotAllowedTests(TestCase):
+    def setUp(self):
+        User.objects.create_superuser(
+            username="root", password="admin123", email="root@example.com"
+        )
+        self.client = APIClient()
+        self.client.login(username="root", password="admin123")
+
+    def test_login_rejects_get(self):
+        assert self.client.get("/api/auth/login/").status_code == 405
+
+    def test_logout_rejects_get(self):
+        assert self.client.get("/api/auth/logout/").status_code == 405
+
+    def test_me_rejects_post(self):
+        assert self.client.post("/api/auth/me/").status_code == 405
+
+    def test_users_rejects_get(self):
+        assert self.client.get("/api/auth/users/").status_code == 405

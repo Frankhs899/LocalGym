@@ -2,10 +2,11 @@ from django.contrib.auth import authenticate, login, logout
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import ensure_csrf_cookie
 from rest_framework import status
-from rest_framework.permissions import AllowAny, IsAdminUser
+from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from .permissions import IsSuperUser
 from .serializers import CreateUserSerializer, LoginSerializer, MeSerializer
 
 INVALID_CREDENTIALS_MESSAGE = "Invalid username or password."
@@ -50,7 +51,7 @@ class MeView(APIView):
 
 
 class CreateUserView(APIView):
-    permission_classes = [IsAdminUser]
+    permission_classes = [IsSuperUser]
 
     def post(self, request):
         serializer = CreateUserSerializer(data=request.data)
