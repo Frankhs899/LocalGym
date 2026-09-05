@@ -48,6 +48,9 @@ REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.IsAuthenticated',
     ],
+    # Restore 401 (not DRF's coerced 403) for unauthenticated callers:
+    # SessionAuthentication provides no WWW-Authenticate challenge, so DRF
+    # would answer anonymous requests with 403. CSRF failures still 403.
     'EXCEPTION_HANDLER': 'accounts.exceptions.force_401_for_unauthenticated',
 }
 

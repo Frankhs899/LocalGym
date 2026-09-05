@@ -36,8 +36,9 @@ Chain strategy: pending
 - [x] 2.3 RED: failing tests — logout clears session + `me`→401, anonymous logout 401 [R2]; `me` 200 `{id, username, is_superuser}` no password, anonymous 401 [R3]; health public 200 [R5]; `SESSION_EXPIRE_AT_BROWSER_CLOSE` is True [R6].
 - [x] 2.4 GREEN: `LogoutView` + `MeView` in `views.py`, `MeSerializer` in `serializers.py`, routes in `accounts/urls.py`; tests pass. [R2, R3, R5]
 - [x] 2.5 RED: write failing tests — superuser creates user 201, no password, `is_superuser=False`; 403 non-superuser; 401 anonymous; 400 duplicate username. [R4]
-- [x] 2.6 GREEN: `CreateUserView` (IsAdminUser) + `CreateUserSerializer` (password write-only, force `is_superuser=False`) until green. [R4]
+- [x] 2.6 GREEN: `CreateUserView` (IsSuperUser) + `CreateUserSerializer` (password write-only, force `is_superuser=False`) until green. [R4]
 - [x] 2.7 Full backend suite green: `backend/venv/Scripts/python.exe manage.py test`. [R1–R6]
+- [x] 2.8 Review fixes: `accounts/permissions.py` `IsSuperUser` (superuser-only, not `is_staff`); `accounts/exceptions.py` + `REST_FRAMEWORK.EXCEPTION_HANDLER` (401-for-anonymous, CSRF failures stay 403); contract lock-in tests (CSRF 403s, session-cookie expiry, 405s, generic-400 edges). [R1–R6]
 
 ## Phase 3: Frontend auth module
 

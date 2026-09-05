@@ -36,7 +36,7 @@ sequenceDiagram
 ```mermaid
 sequenceDiagram
   Browser->>API: POST /api/auth/users {u,p} + X-CSRFToken
-  API->>API: IsAdminUser check; create with is_superuser=False
+  API->>API: IsSuperUser check; create with is_superuser=False
   API-->>Browser: 201 public fields (401 anon / 403 non-superuser / 400 duplicate)
 ```
 
@@ -53,10 +53,12 @@ sequenceDiagram
 |---|---|---|
 | `backend/accounts/__init__.py`, `apps.py` | Create | New app shell |
 | `backend/accounts/serializers.py` | Create | `LoginSerializer`, `MeSerializer`, `CreateUserSerializer` (password write-only, forces `is_superuser=False`) |
-| `backend/accounts/views.py` | Create | `LoginView` (AllowAny + ensure_csrf_cookie, manual 400), `LogoutView`, `MeView`, `CreateUserView` (IsAdminUser) |
+| `backend/accounts/views.py` | Create | `LoginView` (AllowAny + ensure_csrf_cookie, manual 400), `LogoutView`, `MeView`, `CreateUserView` (IsSuperUser) |
+| `backend/accounts/permissions.py` | Create | `IsSuperUser` (`BasePermission` on `is_superuser`; DRF `IsAdminUser` checks `is_staff` and is not sufficient) |
+| `backend/accounts/exceptions.py` | Create | `force_401_for_unauthenticated` handler: anonymous callers get 401 (DRF coerces session-auth 401s to 403 without a challenge header); CSRF failures stay 403 |
 | `backend/accounts/urls.py` | Create | Routes under `api/auth/` |
 | `backend/accounts/tests.py` | Create | TDD matrix (see below) |
-| `backend/config/settings.py` | Modify | `rest_framework` + `accounts` apps; `REST_FRAMEWORK` defaults; `SESSION_EXPIRE_AT_BROWSER_CLOSE=True`; dev `CSRF_TRUSTED_ORIGINS` |
+| `backend/config/settings.py` | Modify | `rest_framework` + `accounts` apps; `REST_FRAMEWORK` defaults + `EXCEPTION_HANDLER` (401-for-anonymous convention); `SESSION_EXPIRE_AT_BROWSER_CLOSE=True`; dev `CSRF_TRUSTED_ORIGINS` |
 | `backend/config/urls.py` | Modify | `include("accounts.urls")`; health untouched |
 | `frontend/src/auth/api.js` | Create | `login/me/logout/createUser` fetch wrappers (`credentials:"include"`, CSRF header, `getCsrfToken()` cookie helper) |
 | `frontend/src/auth/AuthContext.jsx` | Create | `{user, loading, error, login, logout}`; `me()` on mount |
