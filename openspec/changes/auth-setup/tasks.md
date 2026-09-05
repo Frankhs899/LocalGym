@@ -42,17 +42,17 @@ Chain strategy: pending
 
 ## Phase 3: Frontend auth module
 
-- [ ] 3.1 `frontend/src/auth/api.js`: `login`/`me`/`logout`/`createUser` fetch wrappers, `credentials:"include"`, `getCsrfToken()` cookie helper, `X-CSRFToken` header on logout/users. [R2]
-- [ ] 3.2 `frontend/src/auth/AuthContext.jsx`: `{user, loading, error, login, logout}`; `me()` on mount. [R7]
-- [ ] 3.3 `frontend/src/auth/RequireAuth.jsx`: render loading state; `<Navigate to="/login">` when anonymous. [R7]
+- [x] 3.1 `frontend/src/auth/api.js`: `login`/`me`/`logout`/`createUser` fetch wrappers, `credentials:"include"`, `getCsrfToken()` cookie helper, `X-CSRFToken` header on logout/users. [R2]
+- [x] 3.2 `frontend/src/auth/AuthContext.jsx`: `{user, loading, error, login, logout}`; `me()` on mount. [R7]
+- [x] 3.3 `frontend/src/auth/RequireAuth.jsx`: render loading state; `<Navigate to="/login">` when anonymous. [R7]
 
 ## Phase 4: Frontend pages & router
 
-- [ ] 4.1 `frontend/src/pages/Login.jsx`: Spanish form, generic error message, redirect to `/` if already authed. [R7, R8]
-- [ ] 4.2 `frontend/src/pages/NewUser.jsx`: Spanish "Nuevo usuario" screen (superuser-only). [R4, R8]
-- [ ] 4.3 `frontend/src/App.jsx` + `main.jsx`: `BrowserRouter`, protected routes, "Cerrar sesión" button → `logout()` + navigate `/login`. [R7, R8]
+- [x] 4.1 `frontend/src/pages/Login.jsx`: Spanish form, generic error message, redirect to `/` if already authed. [R7, R8]
+- [x] 4.2 `frontend/src/pages/NewUser.jsx`: Spanish "Nuevo usuario" screen (superuser-only). [R4, R8]
+- [x] 4.3 `frontend/src/App.jsx` + `main.jsx`: `BrowserRouter`, protected routes, "Cerrar sesión" button → `logout()` + navigate `/login`. [R7, R8]
 
 ## Phase 5: Final verification
 
-- [ ] 5.1 `pnpm lint` (oxlint) + `pnpm build` pass. [R7, R8]
-- [ ] 5.2 Manual browser checklist: anonymous→`/login`; authed at `/login`→`/`; reload shows loading (no flash); superuser creates user; "Cerrar sesión"→`/login`; generic Spanish error. [R7, R8]
+- [x] 5.1 `pnpm lint` (oxlint) + `pnpm build` pass. [R7, R8]
+- [ ] 5.2 Manual browser checklist: anonymous→`/login`; authed at `/login`→`/`; reload shows loading (no flash); superuser creates user; "Cerrar sesión"→`/login`; generic Spanish error. [R7, R8] (API-level equivalents verified via live-server smoke test in slice 2; browser pass deferred to verify)
