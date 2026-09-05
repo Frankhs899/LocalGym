@@ -55,4 +55,4 @@ Chain strategy: pending
 ## Phase 5: Final verification
 
 - [x] 5.1 `pnpm lint` (oxlint) + `pnpm build` pass. [R7, R8]
-- [ ] 5.2 Manual browser checklist: anonymous→`/login`; authed at `/login`→`/`; reload shows loading (no flash); superuser creates user; "Cerrar sesión"→`/login`; generic Spanish error. [R7, R8] (API-level equivalents verified via live-server smoke test in slice 2; browser pass deferred to verify)
+- [x] 5.2 Manual browser checklist: anonymous→`/login`; authed at `/login`→`/`; reload shows loading (no flash); superuser creates user; "Cerrar sesión"→`/login`; generic Spanish error. [R7, R8] (API-level equivalents verified via live-server smoke test in slice 2; browser pass confirmed by user 2026-09-05)
