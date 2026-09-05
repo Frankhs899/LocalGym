@@ -130,3 +130,64 @@ class HealthTests(TestCase):
 class SessionExpiryTests(TestCase):
     def test_session_expires_on_browser_close(self):
         assert settings.SESSION_EXPIRE_AT_BROWSER_CLOSE is True
+
+
+class CreateUserTests(TestCase):
+    def setUp(self):
+        self.admin = User.objects.create_superuser(
+            username="root", password="admin123", email="root@example.com"
+        )
+        self.member = User.objects.create_user(username="ana", password="secret123")
+
+    def _admin_client(self):
+        csrf_client = APIClient(enforce_csrf_checks=True)
+        login_response = csrf_client.post(
+            "/api/auth/login/", {"username": "root", "password": "admin123"}
+        )
+        assert login_response.status_code == 200
+        csrf_client.credentials(
+            HTTP_X_CSRFTOKEN=csrf_client.cookies["csrftoken"].value
+        )
+        return csrf_client
+
+    def test_superuser_creates_regular_user(self):
+        response = self._admin_client().post(
+            "/api/auth/users/",
+            {"username": "luis", "password": "gympass123"},
+        )
+
+        assert response.status_code == 201
+        assert response.data["username"] == "luis"
+        assert "password" not in response.data
+        created = User.objects.get(username="luis")
+        assert created.is_superuser is False
+        assert created.check_password("gympass123") is True
+
+    def test_non_superuser_gets_403(self):
+        member_client = APIClient()
+        member_client.login(username="ana", password="secret123")
+
+        response = member_client.post(
+            "/api/auth/users/",
+            {"username": "luis", "password": "gympass123"},
+        )
+
+        assert response.status_code == 403
+        assert User.objects.filter(username="luis").exists() is False
+
+    def test_anonymous_gets_401(self):
+        response = APIClient().post(
+            "/api/auth/users/",
+            {"username": "luis", "password": "gympass123"},
+        )
+
+        assert response.status_code == 401
+        assert User.objects.filter(username="luis").exists() is False
+
+    def test_duplicate_username_returns_400(self):
+        response = self._admin_client().post(
+            "/api/auth/users/",
+            {"username": "ana", "password": "otherpass123"},
+        )
+
+        assert response.status_code == 400
