@@ -1,0 +1,59 @@
+# LocalGym — OpenSpec config (SDD)
+
+schema: spec-driven
+
+context: |
+  Monorepo: LocalGym — free, offline-first gym management for small/medium Colombian gyms.
+  backend/ — Django 5.2 + DRF 3.18.0, SQLite, venv at backend/venv (Python 3.12.10). Auth: native
+  Django User + is_superuser, no custom user model. Still startproject scaffold: DRF not yet in
+  INSTALLED_APPS, no apps created. env config via django-environ is future work.
+  frontend/ — React 19 + Vite 8 + Tailwind 4 + react-router 8, plain JavaScript (NO TypeScript), pnpm.
+  ideas.md (Spanish) is the authoritative v1 scope source; code identifiers in English, UI copy in Spanish.
+  Git: branch dev, conventional commits, no AI attribution.
+
+testing:
+  strict_tdd: true # Backend only — Django test runner verified working. Frontend has NO test runner.
+  detected: 2026-09-04
+  backend:
+    runner: "backend/venv/Scripts/python.exe manage.py test"
+    framework: "Django TestCase (unittest)"
+    layers:
+      unit: true
+      integration: true # Django test client + DRF APIClient (DRF install pending)
+      e2e: false
+    coverage: false # no coverage tool installed
+    linter: none # no ruff/flake8 configured
+    formatter: none # no black/isort configured
+  frontend:
+    runner: none # no test script, no vitest/jest/@testing-library/playwright in lockfile
+    lint: "pnpm lint" # oxlint — verified passing
+    build: "pnpm build" # vite build
+    coverage: false
+    type_checker: none # plain JS; @types/react present but no checker runs
+    formatter: none
+
+rules:
+  proposal:
+    - Include rollback plan for risky changes
+  specs:
+    - Use Given/When/Then for scenarios
+    - Use RFC 2119 keywords (MUST, SHALL, SHOULD, MAY)
+  design:
+    - Include sequence diagrams for complex flows
+    - Document architecture decisions with rationale
+  tasks:
+    - Group by phase, use hierarchical numbering
+    - Keep tasks completable in one session
+  apply:
+    - Follow existing code patterns
+    - Never install into global Python; use backend/venv/Scripts/python.exe
+    - Frontend commands via pnpm; no TypeScript
+    - Preserve domain rules from ideas.md (end_date frozen at creation, no same-type overlap)
+    tdd: true
+    test_command: "backend/venv/Scripts/python.exe manage.py test"
+  verify:
+    test_command: "" # no unified monorepo runner; see testing.backend/frontend
+    build_command: "pnpm --dir frontend build"
+    coverage_threshold: 0 # coverage tooling absent
+  archive:
+    - Warn before merging destructive deltas
