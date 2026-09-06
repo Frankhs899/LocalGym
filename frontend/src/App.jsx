@@ -5,6 +5,7 @@ import { AuthProvider } from "./auth/AuthContext.jsx";
 import { useAuth } from "./auth/useAuth.js";
 import RequireAuth from "./auth/RequireAuth.jsx";
 import Login from "./pages/Login.jsx";
+import MemberForm from "./pages/MemberForm.jsx";
 import MembersList from "./pages/MembersList.jsx";
 import NewUser from "./pages/NewUser.jsx";
 
@@ -85,6 +86,22 @@ function App() {
           element={
             <RequireAuth>
               <MembersList />
+            </RequireAuth>
+          }
+        />
+        <Route
+          path="/members/new"
+          element={
+            <RequireAuth>
+              <MemberForm />
+            </RequireAuth>
+          }
+        />
+        <Route
+          path="/members/:id/edit"
+          element={
+            <RequireAuth>
+              <MemberForm />
             </RequireAuth>
           }
         />
