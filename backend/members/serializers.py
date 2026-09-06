@@ -34,5 +34,13 @@ class MemberSerializer(serializers.ModelSerializer):
             "updated_by",
         )
 
+    def to_internal_value(self, data):
+        # Uppercase before ChoiceField validation: DRF validates choices
+        # before validate_<field> runs, so "cc" would 400 without this.
+        if hasattr(data, "get") and isinstance(data.get("document_type"), str):
+            data = data.copy() if hasattr(data, "copy") else dict(data)
+            data["document_type"] = data["document_type"].upper()
+        return super().to_internal_value(data)
+
     def validate_document_type(self, value):
         return value.upper() if value else value
