@@ -5,6 +5,7 @@ import { AuthProvider } from "./auth/AuthContext.jsx";
 import { useAuth } from "./auth/useAuth.js";
 import RequireAuth from "./auth/RequireAuth.jsx";
 import Login from "./pages/Login.jsx";
+import MembersList from "./pages/MembersList.jsx";
 import NewUser from "./pages/NewUser.jsx";
 
 function Home() {
@@ -44,6 +45,9 @@ function Home() {
           Nuevo usuario
         </Link>
       ) : null}
+      <Link to="/members" className="mt-4 text-sm text-emerald-400 underline">
+        Socios
+      </Link>
       <button
         type="button"
         onClick={handleLogout}
@@ -73,6 +77,14 @@ function App() {
           element={
             <RequireAuth>
               <NewUser />
+            </RequireAuth>
+          }
+        />
+        <Route
+          path="/members"
+          element={
+            <RequireAuth>
+              <MembersList />
             </RequireAuth>
           }
         />
