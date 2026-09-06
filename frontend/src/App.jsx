@@ -42,7 +42,7 @@ function Home() {
         <p className="mt-2 text-lg text-emerald-400">API: {status ?? "cargando..."}</p>
       )}
       {user?.is_superuser ? (
-        <Link to="/usuarios/nuevo" className="mt-4 text-sm text-emerald-400 underline">
+        <Link to="/users/new" className="mt-4 text-sm text-emerald-400 underline">
           Nuevo usuario
         </Link>
       ) : null}
@@ -74,7 +74,7 @@ function App() {
           }
         />
         <Route
-          path="/usuarios/nuevo"
+          path="/users/new"
           element={
             <RequireAuth>
               <NewUser />
