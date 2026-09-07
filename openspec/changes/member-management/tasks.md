@@ -27,17 +27,17 @@ Commit boundaries: RED→GREEN pairs commit together (tests with code) — `feat
 
 ## Phase 1: Backend foundation — `members` app [S1]
 
-- [ ] 1.1 RED: `backend/members/tests.py` model tests — doc_type uppercased on save; CC-123 rejected when active AND when inactive; TI-123 vs CC-123 allowed. [Model, Unique]
-- [ ] 1.2 GREEN: `backend/members/{__init__|apps|models}.py` — `Member` + `DocumentType(TextChoices)`, `save().upper()`, `UniqueConstraint(document_type, document_number)`, db indexes; tests green.
-- [ ] 1.3 `makemigrations members` → `0001_initial` (new table, no data move).
-- [ ] 1.4 `backend/config/settings.py` += `members` in `INSTALLED_APPS`; `backend/config/urls.py` mount `path("api/members/", include("members.urls"))`.
+- [x] 1.1 RED: `backend/members/tests.py` model tests — doc_type uppercased on save; CC-123 rejected when active AND when inactive; TI-123 vs CC-123 allowed. [Model, Unique]
+- [x] 1.2 GREEN: `backend/members/{__init__|apps|models}.py` — `Member` + `DocumentType(TextChoices)`, `save().upper()`, `UniqueConstraint(document_type, document_number)`, db indexes; tests green.
+- [x] 1.3 `makemigrations members` → `0001_initial` (new table, no data move).
+- [x] 1.4 `backend/config/settings.py` += `members` in `INSTALLED_APPS`; `backend/config/urls.py` mount `path("api/members/", include("members.urls"))`.
 
 ## Phase 2: Backend API — TDD [S1]
 
-- [ ] 2.1 RED: list/retrieve tests — 25 members→20 + `count=25` + `next`; search=juan (name); search=12345 (document); status active/inactive/all; anonymous 401; retrieve 200 / 404. [List, Retrieve]
-- [ ] 2.2 GREEN: `serializers.py` + `views.py` `MemberListView`(GET) / `MemberDetailView`(GET) — `PageNumberPagination`(20), `Q` icontains ×3, `status` filter, `ordering=-created_at,id`; `members/urls.py` `""` + `"<int:pk>/"`.
-- [ ] 2.3 RED: write tests — create 201 + audit (`created_by`/`updated_by`=user) + lowercase `"cc"`→`"CC"`; 400 invalid doc_type; 400 duplicate active AND inactive pair; PUT full / PATCH partial / 400 unique / audit-B (`updated_by`=B, `created_by`=A); deactivate 200 + idempotent 200 + 401; reactivate PATCH `is_active=True` 200. [Create, Update, Deactivate, Reactivate]
-- [ ] 2.4 GREEN: add POST/PUT/PATCH to serializers+views (`is_active` read-only on create, `created_*` read-only), `MemberDeactivateView`; full suite green: `backend/venv/Scripts/python.exe manage.py test`.
+- [x] 2.1 RED: list/retrieve tests — 25 members→20 + `count=25` + `next`; search=juan (name); search=12345 (document); status active/inactive/all; anonymous 401; retrieve 200 / 404. [List, Retrieve]
+- [x] 2.2 GREEN: `serializers.py` + `views.py` `MemberListView`(GET) / `MemberDetailView`(GET) — `PageNumberPagination`(20), `Q` icontains ×3, `status` filter, `ordering=-created_at,id`; `members/urls.py` `""` + `"<int:pk>/"`.
+- [x] 2.3 RED: write tests — create 201 + audit (`created_by`/`updated_by`=user) + lowercase `"cc"`→`"CC"`; 400 invalid doc_type; 400 duplicate active AND inactive pair; PUT full / PATCH partial / 400 unique / audit-B (`updated_by`=B, `created_by`=A); deactivate 200 + idempotent 200 + 401; reactivate PATCH `is_active=True` 200. [Create, Update, Deactivate, Reactivate]
+- [x] 2.4 GREEN: add POST/PUT/PATCH to serializers+views (`is_active` read-only on create, `created_*` read-only), `MemberDeactivateView`; full suite green: `backend/venv/Scripts/python.exe manage.py test`.
 
 ## Phase 3: Frontend member client + routes [S2]
 

@@ -168,3 +168,175 @@ class MemberRetrieveTests(MemberApiMixin, TestCase):
         response = self.anonymous.get(f"/api/members/{member.pk}/")
 
         assert response.status_code == 401
+
+
+class MemberCreateTests(MemberApiMixin, TestCase):
+    def test_create_returns_201_with_audit(self):
+        response = self.client.post("/api/members/", make_payload(), format="json")
+
+        assert response.status_code == 201
+        assert response.data["is_active"] is True
+        assert response.data["created_by"] == self.user.id
+        assert response.data["updated_by"] == self.user.id
+        assert response.data["created_at"] is not None
+        member = Member.objects.get(pk=response.data["id"])
+        assert member.created_by == self.user
+        assert member.updated_by == self.user
+
+    def test_create_lowercase_document_type_saved_uppercase(self):
+        response = self.client.post(
+            "/api/members/", make_payload(document_type="cc"), format="json"
+        )
+
+        assert response.status_code == 201
+        assert response.data["document_type"] == "CC"
+
+    def test_create_invalid_document_type_returns_400(self):
+        response = self.client.post(
+            "/api/members/", make_payload(document_type="XX"), format="json"
+        )
+
+        assert response.status_code == 400
+
+    def test_create_duplicate_active_pair_returns_400(self):
+        make_member(document_type="CC", document_number="123")
+
+        response = self.client.post(
+            "/api/members/",
+            make_payload(document_type="CC", document_number="123"),
+            format="json",
+        )
+
+        assert response.status_code == 400
+
+    def test_create_duplicate_inactive_pair_returns_400(self):
+        make_member(document_type="CC", document_number="123", is_active=False)
+
+        response = self.client.post(
+            "/api/members/",
+            make_payload(document_type="CC", document_number="123"),
+            format="json",
+        )
+
+        assert response.status_code == 400
+
+    def test_create_ignores_client_is_active(self):
+        response = self.client.post(
+            "/api/members/", make_payload(is_active=False), format="json"
+        )
+
+        assert response.status_code == 201
+        assert response.data["is_active"] is True
+
+    def test_anonymous_create_returns_401(self):
+        response = self.anonymous.post("/api/members/", make_payload(), format="json")
+
+        assert response.status_code == 401
+
+
+class MemberUpdateTests(MemberApiMixin, TestCase):
+    def test_full_update_returns_200_with_audit(self):
+        creator = User.objects.create_user(username="creator", password="secret123")
+        member = make_member(created_by=creator, updated_by=creator)
+
+        response = self.client.put(
+            f"/api/members/{member.pk}/",
+            make_payload(first_name="Carlos", phone="3119998888"),
+            format="json",
+        )
+
+        assert response.status_code == 200
+        member.refresh_from_db()
+        assert member.first_name == "Carlos"
+        assert member.phone == "3119998888"
+        assert member.created_by == creator
+        assert member.updated_by == self.user
+        assert response.data["updated_by"] == self.user.id
+        assert response.data["created_by"] == creator.id
+
+    def test_partial_update_changes_only_phone(self):
+        member = make_member()
+
+        response = self.client.patch(
+            f"/api/members/{member.pk}/", {"phone": "3119998888"}, format="json"
+        )
+
+        assert response.status_code == 200
+        member.refresh_from_db()
+        assert member.phone == "3119998888"
+        assert member.first_name == "Juan"
+
+    def test_update_to_duplicate_pair_returns_400(self):
+        make_member(document_type="CC", document_number="123")
+        other = make_member(document_type="CC", document_number="456")
+
+        response = self.client.put(
+            f"/api/members/{other.pk}/",
+            make_payload(document_number="123"),
+            format="json",
+        )
+
+        assert response.status_code == 400
+
+    def test_update_nonexistent_returns_404(self):
+        response = self.client.put(
+            "/api/members/9999/", make_payload(), format="json"
+        )
+
+        assert response.status_code == 404
+
+    def test_anonymous_update_returns_401(self):
+        member = make_member()
+
+        response = self.anonymous.patch(
+            f"/api/members/{member.pk}/", {"phone": "3119998888"}, format="json"
+        )
+
+        assert response.status_code == 401
+
+
+class MemberDeactivateTests(MemberApiMixin, TestCase):
+    def test_deactivate_sets_inactive(self):
+        member = make_member()
+
+        response = self.client.post(f"/api/members/{member.pk}/deactivate/")
+
+        assert response.status_code == 200
+        assert response.data["is_active"] is False
+        member.refresh_from_db()
+        assert member.is_active is False
+        assert member.updated_by == self.user
+
+    def test_deactivate_is_idempotent(self):
+        member = make_member(is_active=False)
+
+        response = self.client.post(f"/api/members/{member.pk}/deactivate/")
+
+        assert response.status_code == 200
+        assert response.data["is_active"] is False
+
+    def test_deactivate_nonexistent_returns_404(self):
+        response = self.client.post("/api/members/9999/deactivate/")
+
+        assert response.status_code == 404
+
+    def test_anonymous_deactivate_returns_401(self):
+        member = make_member()
+
+        response = self.anonymous.post(f"/api/members/{member.pk}/deactivate/")
+
+        assert response.status_code == 401
+
+
+class MemberReactivateTests(MemberApiMixin, TestCase):
+    def test_reactivate_via_patch(self):
+        member = make_member(is_active=False)
+
+        response = self.client.patch(
+            f"/api/members/{member.pk}/", {"is_active": True}, format="json"
+        )
+
+        assert response.status_code == 200
+        assert response.data["is_active"] is True
+        member.refresh_from_db()
+        assert member.is_active is True
