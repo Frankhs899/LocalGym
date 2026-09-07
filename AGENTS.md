@@ -28,9 +28,9 @@ Monorepo for LocalGym, a free, offline-first gym management system for small/med
 - **pnpm**, not npm — use `pnpm install`, `pnpm dev`, `pnpm build`.
 - `pnpm lint` = oxlint (`frontend/.oxlintrc.json`): `react/rules-of-hooks` is error, `react/only-export-components` is warn. Keep hook and component files separate (see `src/auth/useAuth.js` vs `AuthContext.jsx`) or lint fails.
 - Vite dev proxy **is configured**: `/api` → `http://127.0.0.1:8000`. Run Django + `pnpm dev` together for API calls to work.
-- Auth layer in `src/auth/`: `AuthContext.jsx`, `useAuth.js`, `RequireAuth.jsx`, `api.js` (CSRF handling). `RequireAuth` guards `/` and `/usuarios/nuevo`.
+- Auth layer in `src/auth/`: `AuthContext.jsx`, `useAuth.js`, `RequireAuth.jsx`, `api.js` (CSRF handling). `RequireAuth` guards `/`, `/members`, `/members/new`, `/members/:id/edit`, and `/users/new`.
 - **No test runner configured** (no Vitest) — do not invent frontend test commands.
-- Convention: SPA routes and UI copy are Spanish (`/login`, `/usuarios/nuevo`); API endpoints and code identifiers are English.
+- Convention: SPA routes are English (`/members`, `/users/new`); UI copy is Spanish; API endpoints and code identifiers are English.
 
 ## Domain conventions
 
