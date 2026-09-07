@@ -5,6 +5,7 @@ import { AuthProvider } from "./auth/AuthContext.jsx";
 import { useAuth } from "./auth/useAuth.js";
 import RequireAuth from "./auth/RequireAuth.jsx";
 import Login from "./pages/Login.jsx";
+import MemberForm from "./pages/MemberForm.jsx";
 import MembersList from "./pages/MembersList.jsx";
 import NewUser from "./pages/NewUser.jsx";
 
@@ -41,7 +42,7 @@ function Home() {
         <p className="mt-2 text-lg text-emerald-400">API: {status ?? "cargando..."}</p>
       )}
       {user?.is_superuser ? (
-        <Link to="/usuarios/nuevo" className="mt-4 text-sm text-emerald-400 underline">
+        <Link to="/users/new" className="mt-4 text-sm text-emerald-400 underline">
           Nuevo usuario
         </Link>
       ) : null}
@@ -73,7 +74,7 @@ function App() {
           }
         />
         <Route
-          path="/usuarios/nuevo"
+          path="/users/new"
           element={
             <RequireAuth>
               <NewUser />
@@ -85,6 +86,22 @@ function App() {
           element={
             <RequireAuth>
               <MembersList />
+            </RequireAuth>
+          }
+        />
+        <Route
+          path="/members/new"
+          element={
+            <RequireAuth>
+              <MemberForm />
+            </RequireAuth>
+          }
+        />
+        <Route
+          path="/members/:id/edit"
+          element={
+            <RequireAuth>
+              <MemberForm />
             </RequireAuth>
           }
         />

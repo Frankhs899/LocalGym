@@ -41,16 +41,16 @@ Commit boundaries: RED→GREEN pairs commit together (tests with code) — `feat
 
 ## Phase 3: Frontend member client + routes [S2]
 
-- [ ] 3.1 `frontend/src/auth/api.js`: generalize `request()` (full path, drop `API_BASE` prefix); add `listMembers({search,status,page})` via `URLSearchParams` (omit empty search), `getMember`, `createMember`, `updateMember`, `deactivateMember` — CSRF pattern unchanged.
-- [ ] 3.2 `frontend/src/App.jsx`: add `/members`, `/members/new`, `/members/:id/edit` under `RequireAuth`.
+- [x] 3.1 `frontend/src/auth/api.js`: generalize `request()` (full path, drop `API_BASE` prefix); add `listMembers({search,status,page})` via `URLSearchParams` (omit empty search), `getMember`, `createMember`, `updateMember`, `deactivateMember` — CSRF pattern unchanged.
+- [x] 3.2 `frontend/src/App.jsx`: add `/members`, `/members/new`, `/members/:id/edit` under `RequireAuth`.
 
 ## Phase 4: Frontend pages [S2]
 
-- [ ] 4.1 `frontend/src/pages/MembersList.jsx`: search input, 3-state filter (Active default → `status` query), paginated table, inline deactivate confirm/cancel, reactivate link via edit.
-- [ ] 4.2 `frontend/src/pages/MemberForm.jsx`: create/edit form, Spanish copy; `is_active` checkbox only on edit.
+- [x] 4.1 `frontend/src/pages/MembersList.jsx`: search input, 3-state filter (Active default → `status` query), paginated table, inline deactivate confirm/cancel, reactivate link via edit.
+- [x] 4.2 `frontend/src/pages/MemberForm.jsx`: create/edit form, Spanish copy; `is_active` checkbox only on edit.
 
 ## Phase 5: Route migration, docs, verification [S2]
 
-- [ ] 5.1 `frontend/src/App.jsx` + Home link: replace `/usuarios/nuevo` with `/users/new` (old route gone).
-- [ ] 5.2 `AGENTS.md`: document SPA routes English, UI copy Spanish, identifiers + API English.
-- [ ] 5.3 Verify: `pnpm lint` + `pnpm build`; manual checklist — anon→/login, Active default / Inactive / All switch, deactivate confirm/cancel, `/users/new` renders, `/usuarios/nuevo` gone.
+- [x] 5.1 `frontend/src/App.jsx` + Home link: replace `/usuarios/nuevo` with `/users/new` (old route gone).
+- [x] 5.2 `AGENTS.md`: document SPA routes English, UI copy Spanish, identifiers + API English.
+- [x] 5.3 Verify: `pnpm lint` + `pnpm build`; manual checklist — anon→/login, Active default / Inactive / All switch, deactivate confirm/cancel, `/users/new` renders, `/usuarios/nuevo` gone.
