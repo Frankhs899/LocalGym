@@ -1,30 +1,40 @@
 // WCAG 2.x contrast gate for the Frontend Foundations token palette.
-// Computes relative-luminance contrast ratios for every meaningful
-// foreground/background token pair and exits non-zero on any failure.
-// Run: `node scripts/check-contrast.mjs` from `frontend/`.
+// Reads the token hexes from the `@theme` block in `src/index.css` (the
+// single source of truth) and checks relative-luminance contrast ratios for
+// every meaningful foreground/background token pair. Exits non-zero on any
+// failure. Dependency-free (Node built-ins only).
+// Run: `pnpm check:contrast` from `frontend/`.
 //
 // Tiers:
 // - text pairs must reach >= 4.5:1 (normal text, WCAG AA)
-// - large/UI pairs must reach >= 3:1 (large text / non-text UI, WCAG AA)
+// - large/UI pairs must reach >= 3:1 (large text and non-text UI such as
+//   input boundaries, WCAG AA / 1.4.11)
 //
-// accent-muted is intentionally gated as a large/UI-only token: it is
-// allowed for large text, key numbers and UI accents, never for body text.
+// accent-muted clears 4.5:1 comfortably, so it is graded as a text-tier
+// token. Lime-family tokens are still never body text by design usage rule
+// (FF-DU): accent stays UI/large-only, accent-muted is for key numbers,
+// large text and UI accents.
 
-const TOKENS = {
-  base: "#0a0a0c",
-  surface: "#141417",
-  raised: "#1d1d21",
-  paper: "#f5f5f7",
-  fog: "#9a9aa3",
-  accent: "#d4ff3f",
-  "accent-hover": "#c4f02e",
-  "accent-active": "#aadb1f",
-  "accent-ink": "#0a0a0c",
-  "accent-muted": "#b8c96e",
-  success: "#4ade80",
-  warning: "#fbbf24",
-  danger: "#f87171",
-};
+import { readFileSync } from "node:fs";
+
+const INDEX_CSS = new URL("../src/index.css", import.meta.url);
+
+function loadTokens(cssPath) {
+  const css = readFileSync(cssPath, "utf8");
+  const theme = css.match(/@theme\s*\{([^}]*)\}/s);
+  if (!theme) {
+    throw new Error(`No @theme block found in ${cssPath}`);
+  }
+  const tokens = {};
+  for (const [, name, hex] of theme[1].matchAll(
+    /--color-([a-z-]+)\s*:\s*(#[0-9a-fA-F]{3,8})\s*;/g,
+  )) {
+    tokens[name] = hex.toLowerCase();
+  }
+  return tokens;
+}
+
+const TOKENS = loadTokens(INDEX_CSS);
 
 // [foreground, background, minimum ratio, use]
 const PAIRS = [
@@ -46,11 +56,16 @@ const PAIRS = [
   ["success", "base", 4.5, "success text on app background"],
   ["warning", "base", 4.5, "warning text on app background"],
   ["danger", "base", 4.5, "danger text on app background"],
+  // accent-muted clears 4.5:1 — graded as text-tier (key numbers, large text)
+  ["accent-muted", "base", 4.5, "muted accent text on app background"],
+  ["accent-muted", "surface", 4.5, "muted accent text on surface"],
   // Large text / UI-only accents (>= 3:1)
   ["accent", "base", 3, "large lime accent on app background"],
   ["accent", "surface", 3, "large lime accent on surface"],
-  ["accent-muted", "base", 3, "muted accent UI on app background"],
-  ["accent-muted", "surface", 3, "muted accent UI on surface"],
+  // Input boundaries (WCAG 1.4.11 non-text UI)
+  ["line", "base", 3, "hairline border on app background"],
+  ["line", "surface", 3, "hairline border on surface"],
+  ["line", "raised", 3, "hairline border on raised surface"],
 ];
 
 function hexToRgb(hex) {
@@ -77,6 +92,12 @@ function ratio(fg, bg) {
 
 let failures = 0;
 for (const [fgName, bgName, min, use] of PAIRS) {
+  if (!(fgName in TOKENS) || !(bgName in TOKENS)) {
+    // eslint-disable-next-line no-console
+    console.error(`FAIL  missing token: ${fgName} or ${bgName} not in @theme`);
+    failures += 1;
+    continue;
+  }
   const value = ratio(TOKENS[fgName], TOKENS[bgName]);
   const ok = value >= min;
   if (!ok) failures += 1;
