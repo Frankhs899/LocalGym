@@ -98,7 +98,7 @@ export default function MembersList() {
   }
 
   return (
-    <main className="min-h-screen bg-zinc-950 px-4 py-8">
+    <main className="min-h-screen bg-base px-4 py-8">
       <div className="mx-auto w-full max-w-5xl">
         <div className="flex flex-wrap items-center justify-between gap-4">
           <h1 className="text-3xl font-semibold tracking-tight text-white">Socios</h1>
