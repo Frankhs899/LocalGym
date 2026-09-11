@@ -39,14 +39,14 @@ function Home() {
       {error ? (
         <p className="mt-2 text-lg text-red-400">API: error - {error}</p>
       ) : (
-        <p className="mt-2 text-lg text-emerald-400">API: {status ?? "cargando..."}</p>
+        <p className="mt-2 text-lg text-success">API: {status ?? "cargando..."}</p>
       )}
       {user?.is_superuser ? (
-        <Link to="/users/new" className="mt-4 text-sm text-emerald-400 underline">
+        <Link to="/users/new" className="mt-4 text-sm text-success underline">
           Nuevo usuario
         </Link>
       ) : null}
-      <Link to="/members" className="mt-4 text-sm text-emerald-400 underline">
+      <Link to="/members" className="mt-4 text-sm text-success underline">
         Socios
       </Link>
       <button
