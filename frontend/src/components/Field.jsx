@@ -41,8 +41,7 @@ export default function Field({
 
   let control = children;
   if (isValidElement(children)) {
-    const existingDescribedBy =
-      children.props["aria-describedby"] ?? children.props["ariaDescribedBy"];
+    const existingDescribedBy = children.props["aria-describedby"];
     control = cloneElement(children, {
       id: children.props.id ?? name,
       "aria-invalid": error ? "true" : undefined,
