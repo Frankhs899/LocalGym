@@ -2,6 +2,7 @@ import { useState } from "react";
 
 import { createUser } from "../auth/api.js";
 import { useAuth } from "../auth/useAuth.js";
+import { Button, ErrorMessage, Field } from "../components/index.js";
 
 export default function NewUser() {
   const { user } = useAuth();
@@ -45,45 +46,35 @@ export default function NewUser() {
     <main className="flex min-h-screen flex-col items-center justify-center bg-zinc-950 px-4">
       <h1 className="text-3xl font-semibold tracking-tight text-white">Nuevo usuario</h1>
       <form onSubmit={handleSubmit} className="mt-6 flex w-full max-w-sm flex-col gap-4">
-        <label className="flex flex-col gap-1 text-left text-sm text-zinc-300">
-          Usuario
+        <Field label="Usuario" name="username">
           <input
+            name="username"
             type="text"
             autoComplete="off"
             value={username}
             onChange={(event) => setUsername(event.target.value)}
             required
-            className="rounded border border-zinc-700 bg-zinc-900 px-3 py-2 text-white"
           />
-        </label>
-        <label className="flex flex-col gap-1 text-left text-sm text-zinc-300">
-          Contraseña
+        </Field>
+        <Field label="Contraseña" name="password">
           <input
+            name="password"
             type="password"
             autoComplete="new-password"
             value={password}
             onChange={(event) => setPassword(event.target.value)}
             required
-            className="rounded border border-zinc-700 bg-zinc-900 px-3 py-2 text-white"
           />
-        </label>
-        {error ? (
-          <p role="alert" className="text-sm text-red-400">
-            {error}
-          </p>
-        ) : null}
+        </Field>
+        {error ? <ErrorMessage message={error} /> : null}
         {success ? (
-          <p role="status" className="text-sm text-emerald-400">
+          <p role="status" className="text-sm text-success">
             {success}
           </p>
         ) : null}
-        <button
-          type="submit"
-          disabled={submitting}
-          className="rounded bg-emerald-600 px-3 py-2 font-medium text-white disabled:opacity-50"
-        >
+        <Button type="submit" loading={submitting}>
           {submitting ? "Creando..." : "Crear usuario"}
-        </button>
+        </Button>
       </form>
     </main>
   );

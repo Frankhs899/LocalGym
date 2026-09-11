@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Navigate, useNavigate } from "react-router";
 
 import { useAuth } from "../auth/useAuth.js";
+import { Button, ErrorMessage, Field } from "../components/index.js";
 
 export default function Login() {
   const { user, loading, login } = useAuth();
@@ -33,40 +34,30 @@ export default function Login() {
     <main className="flex min-h-screen flex-col items-center justify-center bg-zinc-950 px-4">
       <h1 className="text-3xl font-semibold tracking-tight text-white">Iniciar sesión</h1>
       <form onSubmit={handleSubmit} className="mt-6 flex w-full max-w-sm flex-col gap-4">
-        <label className="flex flex-col gap-1 text-left text-sm text-zinc-300">
-          Usuario
+        <Field label="Usuario" name="username">
           <input
+            name="username"
             type="text"
             autoComplete="username"
             value={username}
             onChange={(event) => setUsername(event.target.value)}
             required
-            className="rounded border border-zinc-700 bg-zinc-900 px-3 py-2 text-white"
           />
-        </label>
-        <label className="flex flex-col gap-1 text-left text-sm text-zinc-300">
-          Contraseña
+        </Field>
+        <Field label="Contraseña" name="password">
           <input
+            name="password"
             type="password"
             autoComplete="current-password"
             value={password}
             onChange={(event) => setPassword(event.target.value)}
             required
-            className="rounded border border-zinc-700 bg-zinc-900 px-3 py-2 text-white"
           />
-        </label>
-        {error ? (
-          <p role="alert" className="text-sm text-red-400">
-            {error}
-          </p>
-        ) : null}
-        <button
-          type="submit"
-          disabled={submitting}
-          className="rounded bg-emerald-600 px-3 py-2 font-medium text-white disabled:opacity-50"
-        >
+        </Field>
+        {error ? <ErrorMessage message={error} /> : null}
+        <Button type="submit" loading={submitting}>
           {submitting ? "Ingresando..." : "Ingresar"}
-        </button>
+        </Button>
       </form>
     </main>
   );
