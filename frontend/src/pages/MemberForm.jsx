@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
-import { Link, useNavigate, useParams } from "react-router";
+import { useNavigate, useParams } from "react-router";
 
 import { createMember, getMember, updateMember } from "../auth/api.js";
+import { Button, ErrorMessage, Field, LoadingSkeleton } from "../components/index.js";
 
 const DOCUMENT_TYPES = ["CC", "TI", "CE", "PA", "RC"];
 
@@ -124,8 +125,10 @@ export default function MemberForm() {
 
   if (loading) {
     return (
-      <main className="flex min-h-screen items-center justify-center bg-zinc-950">
-        <p className="text-lg text-zinc-400">Cargando...</p>
+      <main className="min-h-screen bg-zinc-950 px-4 py-8">
+        <div className="mx-auto w-full max-w-2xl">
+          <LoadingSkeleton lines={6} label="Cargando..." />
+        </div>
       </main>
     );
   }
@@ -139,14 +142,12 @@ export default function MemberForm() {
 
         <form onSubmit={handleSubmit} className="mt-6 flex flex-col gap-4">
           <div className="grid gap-4 sm:grid-cols-2">
-            <label className="flex flex-col gap-1 text-left text-sm text-zinc-300">
-              Tipo de documento
+            <Field label="Tipo de documento" name="document_type">
               <select
                 name="document_type"
                 value={form.document_type}
                 onChange={handleChange}
                 required
-                className="rounded border border-zinc-700 bg-zinc-900 px-3 py-2 text-white"
               >
                 {DOCUMENT_TYPES.map((type) => (
                   <option key={type} value={type}>
@@ -154,9 +155,8 @@ export default function MemberForm() {
                   </option>
                 ))}
               </select>
-            </label>
-            <label className="flex flex-col gap-1 text-left text-sm text-zinc-300">
-              Número de documento
+            </Field>
+            <Field label="Número de documento" name="document_number">
               <input
                 name="document_number"
                 type="text"
@@ -164,14 +164,12 @@ export default function MemberForm() {
                 value={form.document_number}
                 onChange={handleChange}
                 required
-                className="rounded border border-zinc-700 bg-zinc-900 px-3 py-2 text-white"
               />
-            </label>
+            </Field>
           </div>
 
           <div className="grid gap-4 sm:grid-cols-2">
-            <label className="flex flex-col gap-1 text-left text-sm text-zinc-300">
-              Nombres
+            <Field label="Nombres" name="first_name">
               <input
                 name="first_name"
                 type="text"
@@ -179,11 +177,9 @@ export default function MemberForm() {
                 value={form.first_name}
                 onChange={handleChange}
                 required
-                className="rounded border border-zinc-700 bg-zinc-900 px-3 py-2 text-white"
               />
-            </label>
-            <label className="flex flex-col gap-1 text-left text-sm text-zinc-300">
-              Apellidos
+            </Field>
+            <Field label="Apellidos" name="last_name">
               <input
                 name="last_name"
                 type="text"
@@ -191,25 +187,21 @@ export default function MemberForm() {
                 value={form.last_name}
                 onChange={handleChange}
                 required
-                className="rounded border border-zinc-700 bg-zinc-900 px-3 py-2 text-white"
               />
-            </label>
+            </Field>
           </div>
 
           <div className="grid gap-4 sm:grid-cols-2">
-            <label className="flex flex-col gap-1 text-left text-sm text-zinc-300">
-              Fecha de nacimiento
+            <Field label="Fecha de nacimiento" name="birth_date">
               <input
                 name="birth_date"
                 type="date"
                 value={form.birth_date}
                 onChange={handleChange}
                 required
-                className="rounded border border-zinc-700 bg-zinc-900 px-3 py-2 text-white"
               />
-            </label>
-            <label className="flex flex-col gap-1 text-left text-sm text-zinc-300">
-              Teléfono
+            </Field>
+            <Field label="Teléfono" name="phone">
               <input
                 name="phone"
                 type="tel"
@@ -217,39 +209,33 @@ export default function MemberForm() {
                 value={form.phone}
                 onChange={handleChange}
                 required
-                className="rounded border border-zinc-700 bg-zinc-900 px-3 py-2 text-white"
               />
-            </label>
+            </Field>
           </div>
 
           <div className="grid gap-4 sm:grid-cols-2">
-            <label className="flex flex-col gap-1 text-left text-sm text-zinc-300">
-              Correo electrónico (opcional)
+            <Field label="Correo electrónico (opcional)" name="email">
               <input
                 name="email"
                 type="email"
                 autoComplete="off"
                 value={form.email}
                 onChange={handleChange}
-                className="rounded border border-zinc-700 bg-zinc-900 px-3 py-2 text-white"
               />
-            </label>
-            <label className="flex flex-col gap-1 text-left text-sm text-zinc-300">
-              Dirección (opcional)
+            </Field>
+            <Field label="Dirección (opcional)" name="address">
               <input
                 name="address"
                 type="text"
                 autoComplete="off"
                 value={form.address}
                 onChange={handleChange}
-                className="rounded border border-zinc-700 bg-zinc-900 px-3 py-2 text-white"
               />
-            </label>
+            </Field>
           </div>
 
           <div className="grid gap-4 sm:grid-cols-2">
-            <label className="flex flex-col gap-1 text-left text-sm text-zinc-300">
-              Contacto de emergencia
+            <Field label="Contacto de emergencia" name="emergency_contact_name">
               <input
                 name="emergency_contact_name"
                 type="text"
@@ -257,11 +243,9 @@ export default function MemberForm() {
                 value={form.emergency_contact_name}
                 onChange={handleChange}
                 required
-                className="rounded border border-zinc-700 bg-zinc-900 px-3 py-2 text-white"
               />
-            </label>
-            <label className="flex flex-col gap-1 text-left text-sm text-zinc-300">
-              Teléfono de emergencia
+            </Field>
+            <Field label="Teléfono de emergencia" name="emergency_contact_phone">
               <input
                 name="emergency_contact_phone"
                 type="tel"
@@ -269,32 +253,27 @@ export default function MemberForm() {
                 value={form.emergency_contact_phone}
                 onChange={handleChange}
                 required
-                className="rounded border border-zinc-700 bg-zinc-900 px-3 py-2 text-white"
               />
-            </label>
+            </Field>
           </div>
 
-          <label className="flex flex-col gap-1 text-left text-sm text-zinc-300">
-            Condiciones médicas
+          <Field label="Condiciones médicas" name="medical_conditions">
             <textarea
               name="medical_conditions"
               value={form.medical_conditions}
               onChange={handleChange}
               rows={3}
-              className="rounded border border-zinc-700 bg-zinc-900 px-3 py-2 text-white"
             />
-          </label>
+          </Field>
 
-          <label className="flex flex-col gap-1 text-left text-sm text-zinc-300">
-            Notas (opcional)
+          <Field label="Notas (opcional)" name="notes">
             <textarea
               name="notes"
               value={form.notes}
               onChange={handleChange}
               rows={3}
-              className="rounded border border-zinc-700 bg-zinc-900 px-3 py-2 text-white"
             />
-          </label>
+          </Field>
 
           {isEdit ? (
             <label className="flex items-center gap-2 text-left text-sm text-zinc-300">
@@ -302,32 +281,25 @@ export default function MemberForm() {
                 type="checkbox"
                 checked={isActive}
                 onChange={(event) => setIsActive(event.target.checked)}
-                className="h-4 w-4 accent-emerald-600"
+                className="h-4 w-4 accent-accent"
               />
               Socio activo
             </label>
           ) : null}
 
-          {error ? (
-            <p role="alert" className="text-sm text-red-400">
-              {error}
-            </p>
-          ) : null}
+          {error ? <ErrorMessage message={error} /> : null}
 
           <div className="flex gap-2">
-            <button
-              type="submit"
-              disabled={submitting}
-              className="rounded bg-emerald-600 px-3 py-2 font-medium text-white disabled:opacity-50"
-            >
+            <Button type="submit" loading={submitting}>
               {submitting ? "Guardando..." : isEdit ? "Guardar cambios" : "Crear socio"}
-            </button>
-            <Link
-              to="/members"
-              className="rounded bg-zinc-800 px-3 py-2 text-sm font-medium text-white"
+            </Button>
+            <Button
+              type="button"
+              variant="secondary"
+              onClick={() => navigate("/members")}
             >
               Cancelar
-            </Link>
+            </Button>
           </div>
         </form>
       </div>
