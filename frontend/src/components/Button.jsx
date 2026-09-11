@@ -1,3 +1,5 @@
+import { buttonClasses } from "./buttonStyles.js";
+
 /**
  * Primary action button for the LocalGym kit.
  *
@@ -7,11 +9,13 @@
  * - `ghost`: transparent, for tertiary actions.
  * - `danger`: semantic `danger` background with ink text.
  *
+ * Variant/size classes live in `buttonStyles.js`, shared with `LinkButton`.
+ *
  * When `loading` is true the button is disabled, exposes `aria-busy`,
  * and shows a spinner ahead of its children.
  *
- * @typedef {"primary" | "secondary" | "ghost" | "danger"} ButtonVariant
- * @typedef {"sm" | "md"} ButtonSize
+ * @typedef {import("./buttonStyles.js").ButtonVariant} ButtonVariant
+ * @typedef {import("./buttonStyles.js").ButtonSize} ButtonSize
  *
  * @param {object} props
  * @param {ButtonVariant} [props.variant="primary"] Visual variant.
@@ -21,19 +25,6 @@
  * @param {string} [props.className=""] Extra classes appended after the kit classes.
  * @param {import("react").ButtonHTMLAttributes<HTMLButtonElement>} [props.rest] Native button props (`type`, `onClick`, `disabled`, ...).
  */
-const VARIANT_CLASSES = {
-  primary:
-    "bg-accent text-accent-ink hover:bg-accent-hover active:bg-accent-active",
-  secondary:
-    "border border-line bg-surface text-paper hover:bg-raised active:bg-raised",
-  ghost: "bg-transparent text-paper hover:bg-raised active:bg-raised",
-  danger: "bg-danger text-accent-ink hover:brightness-110 active:brightness-95",
-};
-
-const SIZE_CLASSES = {
-  sm: "px-3 py-1.5 text-body-sm",
-  md: "px-4 py-2 text-body-md",
-};
 
 export default function Button({
   variant = "primary",
@@ -51,16 +42,7 @@ export default function Button({
       type={type}
       disabled={isDisabled}
       aria-busy={loading ? "true" : undefined}
-      className={[
-        "inline-flex items-center justify-center gap-2 rounded-field font-medium",
-        "transition-colors duration-150 ease-app",
-        "disabled:cursor-not-allowed disabled:opacity-50",
-        VARIANT_CLASSES[variant],
-        SIZE_CLASSES[size],
-        className,
-      ]
-        .filter(Boolean)
-        .join(" ")}
+      className={buttonClasses({ variant, size, className })}
       {...buttonProps}
     >
       {loading ? (
