@@ -13,7 +13,7 @@ export default function Login() {
   const [submitting, setSubmitting] = useState(false);
 
   if (!loading && user) {
-    return <Navigate to="/" replace />;
+    return <Navigate to="/dashboard" replace />;
   }
 
   async function handleSubmit(event) {
@@ -22,7 +22,7 @@ export default function Login() {
     setSubmitting(true);
     try {
       await login(username, password);
-      navigate("/", { replace: true });
+      navigate("/dashboard", { replace: true });
     } catch {
       setError("Usuario o contraseña incorrectos.");
     } finally {
