@@ -26,6 +26,11 @@ export default function Modal({
   const titleId = useId();
   const closeRef = useRef(null);
   const previousFocusRef = useRef(null);
+  const onCloseRef = useRef(onClose);
+
+  useEffect(() => {
+    onCloseRef.current = onClose;
+  });
 
   useEffect(() => {
     if (!open) {
@@ -36,7 +41,7 @@ export default function Modal({
 
     const handleKeyDown = (event) => {
       if (event.key === "Escape") {
-        onClose();
+        onCloseRef.current();
       }
     };
     document.addEventListener("keydown", handleKeyDown);
@@ -47,7 +52,7 @@ export default function Modal({
         previousFocusRef.current.focus();
       }
     };
-  }, [open, onClose]);
+  }, [open]);
 
   if (!open) {
     return null;
