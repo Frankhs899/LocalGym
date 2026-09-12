@@ -2,7 +2,7 @@
 
 ## Purpose
 
-Session auth for LocalGym: login, logout, current-user, superuser-only user creation, route guarding + Spanish UI. Native Django `User` + `is_superuser`; no JWT. `/api/health/` stays public.
+Session auth for LocalGym: login, logout, current-user, superuser-only user creation, route guarding + Spanish UI. Native Django `User` + `is_superuser`; no JWT. `/api/health/` stays public. Public landing at `/`; authenticated subtree under `/dashboard`.
 
 ## Requirements
 
@@ -62,19 +62,20 @@ Sessions MUST set `SESSION_EXPIRE_AT_BROWSER_CLOSE=True`; the session cookie car
 
 ### Requirement: Frontend Route Guarding
 
-Protected routes MUST redirect unauthenticated users to `/login`; `/login` MUST redirect authenticated users to `/`. Auth state MUST load on mount via AuthContext `me()` with a loading state, so reloads flash neither content nor login page.
+Protected routes (`/dashboard` subtree, `/members*`, `/users/new`) MUST redirect unauthenticated users to `/login`; `/login` MUST redirect authenticated users to `/dashboard`. `/` MUST render the public landing for everyone with no redirect. Auth state MUST load on mount via AuthContext `me()` with a loading state, so reloads flash neither content nor login page.
 
 | Scenario | GIVEN | WHEN | THEN |
 |----------|-------|------|------|
 | Anonymous redirected | no session, protected route | app mounts | redirected to /login |
-| Authenticated access | an authenticated session | app mounts, `me()` resolves | protected routes render instead of /login |
-| At /login | an authenticated session | user visits /login | redirected to / |
+| Public landing | no session | user visits `/` | public Landing renders; no redirect |
+| Authenticated access | an authenticated session | app mounts, `me()` resolves | protected subtree renders instead of /login |
+| Authenticated at /login | an authenticated session | user visits /login | redirected to /dashboard |
 | Reload flicker | authenticated session, reload | app mounts while `me()` pending | loading state; no redirect until `me()` resolves |
 
 ### Requirement: Spanish UI Copy
 
-Login and user-creation screens MUST use Spanish UI copy, including a logout button labeled "Cerrar sesión".
+Login, landing, dashboard shell, and user-creation screens MUST use Spanish UI copy, including logout labeled "Cerrar sesión", shell nav labels ("Gestión de Usuarios", "Miembros", "Membresías", "Pagos"), the "Próximamente" badge, and the "Ingresar" login button.
 
 | Scenario | GIVEN | WHEN | THEN |
 |----------|-------|------|------|
-| Spanish screens | the frontend app | login page, new-user screen ("Nuevo usuario"), logout button render | their copy is in Spanish |
+| Spanish screens | the frontend app | login page, new-user screen ("Nuevo usuario"), landing, shell nav, badge, "Ingresar" render | their copy is in Spanish |
