@@ -1,7 +1,8 @@
+import { useState } from "react";
 import { NavLink, Outlet, useNavigate } from "react-router";
 
 import { useAuth } from "../auth/useAuth.js";
-import { Badge, Button } from "../components/index.js";
+import { Badge, Button, ErrorMessage } from "../components/index.js";
 
 const NAV_LINK_BASE =
   "flex items-center justify-between gap-2 rounded-field px-3 py-2 text-body-md font-medium transition-colors duration-150 ease-app";
@@ -22,10 +23,16 @@ const NAV_LINK_TONES = {
 export default function AppShell() {
   const { logout } = useAuth();
   const navigate = useNavigate();
+  const [logoutError, setLogoutError] = useState(null);
 
   async function handleLogout() {
-    await logout();
-    navigate("/login", { replace: true });
+    setLogoutError(null);
+    try {
+      await logout();
+      navigate("/login", { replace: true });
+    } catch {
+      setLogoutError("No se pudo cerrar la sesión. Inténtalo de nuevo.");
+    }
   }
 
   return (
@@ -62,7 +69,6 @@ export default function AppShell() {
           <button
             type="button"
             disabled
-            aria-disabled="true"
             className={`${NAV_LINK_BASE} cursor-not-allowed opacity-60`}
           >
             Membresías
@@ -71,14 +77,14 @@ export default function AppShell() {
           <button
             type="button"
             disabled
-            aria-disabled="true"
             className={`${NAV_LINK_BASE} cursor-not-allowed opacity-60`}
           >
             Pagos
             <Badge tone="zinc">Próximamente</Badge>
           </button>
         </nav>
-        <div className="border-t border-line p-4">
+        <div className="flex flex-col gap-2 border-t border-line p-4">
+          {logoutError ? <ErrorMessage message={logoutError} /> : null}
           <Button variant="ghost" onClick={handleLogout} className="w-full">
             Cerrar sesión
           </Button>

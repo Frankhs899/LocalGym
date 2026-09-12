@@ -1,4 +1,4 @@
-import { Link } from "react-router";
+import { LinkButton } from "../components/index.js";
 
 /**
  * Public landing at `/`.
@@ -13,12 +13,9 @@ export default function Landing() {
     <div className="flex min-h-screen flex-col bg-base text-paper">
       <header className="flex items-center justify-between border-b border-line bg-surface px-6 py-4">
         <p className="font-display text-display-md font-semibold tracking-tight">LocalGym</p>
-        <Link
-          to="/login"
-          className="rounded-field bg-accent px-4 py-2 text-body-md font-medium text-accent-ink transition-colors duration-150 ease-app hover:bg-accent-hover active:bg-accent-active"
-        >
+        <LinkButton to="/login">
           Iniciar sesión
-        </Link>
+        </LinkButton>
       </header>
       <main className="mx-auto flex w-full max-w-3xl flex-1 flex-col justify-center px-6 py-12">
         <h1 className="font-display text-display-xl font-semibold tracking-tight">

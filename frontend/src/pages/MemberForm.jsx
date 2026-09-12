@@ -125,7 +125,7 @@ export default function MemberForm() {
 
   if (loading) {
     return (
-      <main className="min-h-screen bg-zinc-950 px-4 py-8">
+      <main className="min-h-screen bg-base px-4 py-8">
         <div className="mx-auto w-full max-w-2xl">
           <LoadingSkeleton lines={6} label="Cargando..." />
         </div>
@@ -134,7 +134,7 @@ export default function MemberForm() {
   }
 
   return (
-    <main className="min-h-screen bg-zinc-950 px-4 py-8">
+    <main className="min-h-screen bg-base px-4 py-8">
       <div className="mx-auto w-full max-w-2xl">
         <h1 className="text-3xl font-semibold tracking-tight text-white">
           {isEdit ? "Editar socio" : "Nuevo socio"}
